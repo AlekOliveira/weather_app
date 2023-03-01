@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/widgets/today_forecast.dart';
 import 'package:weather_app/services/windy_point_forecast_api.dart';
+import 'package:weather_app/services/nominatim_reverse_geocoding.dart';
+import 'package:flutter/foundation.dart';
+
 
 class Home extends StatefulWidget {
   @override
@@ -12,6 +15,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   /* vars with _underscore before the name means that they are private vars*/
   Map<String, dynamic> _forecastData = {};
+
   bool _isLoading = false;
 
   @override
@@ -26,8 +30,11 @@ class _HomeState extends State<Home> {
     });
 
     try {
-      final apiService = WindyPointForecastApiService();
-      final forecastData = await apiService.getForecastData(-23.2927, -51.1732);
+      final apiServiceWindy = WindyPointForecastApiService();
+      final apiServiceNominatim = NominatimGeocodeApiService();
+
+      final addresGeocode = await apiServiceNominatim.getAddresGeocode('Londrina');
+      final forecastData = await apiServiceWindy.getForecastData(addresGeocode['lat'], addresGeocode['lon']);
       
       /*
         TO-DO, process all the data to retrieve the following informations:
