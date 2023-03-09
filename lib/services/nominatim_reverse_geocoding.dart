@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:developer';
-import 'package:flutter/foundation.dart';
 
 class NominatimGeocodeApiService {
   String _baseUrl =

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:weather_app/widgets/today_forecast.dart';
 import 'package:weather_app/services/windy_point_forecast_api.dart';
 import 'package:weather_app/services/nominatim_reverse_geocoding.dart';
-import 'package:flutter/foundation.dart';
 
 
 class Home extends StatefulWidget {
@@ -75,12 +74,14 @@ class _HomeState extends State<Home> {
       ),
       body: Column(
         children: [
-          TodayForecast(
-              city: "Londrina",
-              minTemp: 20.0,
-              currTemp: 24.0,
-              maxTemp: 26.0,
-              description: "Mostly Cloudy")
+          _isLoading
+              ? Expanded(child: Center(child: CircularProgressIndicator()))
+              : TodayForecast(
+                  city: "Londrina",
+                  minTemp: _forecastData['minTemp'],
+                  currTemp: _forecastData['currTemp'],
+                  maxTemp: _forecastData['maxTemp'],
+                  description: "Mostly Cloudy")
         ],
       ),
     );
