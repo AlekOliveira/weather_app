@@ -21,39 +21,40 @@ class WindyPointForecastApiService {
     );
 
     if (response.statusCode == 200) {
-      // celsius = (kelvinTemp - 273.15)
-
-      /*200: everything went as expected
-        204: the selected model does not feature any of the requested parameters
-        400: invalid request, error in the body’s description
-        500: unexpected error (normally it should not occur - can happen e.g. when our back ends cannot return data)*/
-
       final data = jsonDecode(response.body);
-      final timeStamps = data['ts'];
+
       List<dynamic> tempKelvin = data['temp-surface'];
-      final double minTemp =
-          tempKelvin.reduce((curr, next) => curr < next ? curr : next);
       final double maxTemp =
+          tempKelvin.reduce((curr, next) => curr < next ? curr : next);
+      final double minTemp =
           tempKelvin.reduce((curr, next) => curr > next ? curr : next);
-      List<DateTime> timeData = [];
-      timeStamps.forEach((timeStamp) =>
-          timeData.add(DateTime.fromMicrosecondsSinceEpoch(timeStamp)));
+
+      //obtain timeStamps list
+      List<int> timeStamps = List.from(data['ts']);
+
+      //search the closest time stamp from now
+      final int currTimestamp = DateTime.now().millisecondsSinceEpoch;
+      int closestTimestampFromNow = timeStamps[0];
+
+      closestTimestampFromNow = timeStamps.reduce((closest, timestampValue) =>
+          ((timestampValue - currTimestamp).abs() <
+                  (closest - currTimestamp).abs())
+              ? timestampValue
+              : closest);
+
+      //get the currtent temperature using the index of the closest time stamp from now
+      double currTemp = tempKelvin[timeStamps.indexOf(closestTimestampFromNow)];
+
+      print('currTimestamp: ${DateTime.fromMicrosecondsSinceEpoch(currTimestamp)}');
+      print('closestTimestampFromNow : ${DateTime.fromMicrosecondsSinceEpoch(closestTimestampFromNow)}');
 
       return {
         'tempKelvin': tempKelvin,
-        'timeData': timeData,
         'minTemp': minTemp,
-        'currTemp': 2.0,
+        'currTemp': currTemp,
         'maxTemp': maxTemp
       };
     } else {
-      // return {
-      //   'tempKelvin': [100.0, 120.0, 130.0],
-      //   'minTemp': 4.0,
-      //   'currTemp': 2.0,
-      //   'maxTemp': 10.0
-      // };
-
       throw Exception('${response.body}');
     }
   }

@@ -124,9 +124,9 @@ class _HomeState extends State<Home> {
               ? Expanded(child: Center(child: CircularProgressIndicator()))
               : TodayForecast(
                   city: "Londrina",
-                  minTemp: _forecastData['minTemp'],
-                  currTemp: _forecastData['currTemp'],
-                  maxTemp: _forecastData['maxTemp'],
+                  minTemp: _forecastData['minTemp'] - 273.15,
+                  currTemp: _forecastData['currTemp'] - 273.15,
+                  maxTemp: _forecastData['maxTemp'] - 273.15,
                   description: "Mostly Cloudy")
         ],
       ),
