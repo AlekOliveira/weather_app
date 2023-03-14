@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/widgets/today_forecast.dart';
 import 'package:weather_app/services/windy_point_forecast_api.dart';
-import 'package:weather_app/services/nominatim_reverse_geocoding.dart';
-
+// import 'package:weather_app/services/nominatim_reverse_geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -21,6 +21,48 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _loadForecastData();
+    _determinePosition();
+  }
+
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
   }
 
   Future<void> _loadForecastData() async {
@@ -29,28 +71,32 @@ class _HomeState extends State<Home> {
     });
 
     try {
+      //Api service layer to dinamically return geocode for cities by string
+      // final apiServiceNominatim = NominatimGeocodeApiService();
+      // final addresGeocode = await apiServiceNominatim.getAddresGeocode('Londrina');
+
+      Position position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+      } catch (e) {
+        print(e);
+        position = Position(
+            latitude: -23.2927,
+            longitude: -51.1732,
+            accuracy: 0,
+            altitude: 0,
+            heading: 0,
+            speed: 0,
+            speedAccuracy: 0,
+            timestamp: DateTime.now(),
+            floor: 0,
+            isMocked: false);
+      }
+
       final apiServiceWindy = WindyPointForecastApiService();
-      final apiServiceNominatim = NominatimGeocodeApiService();
-
-      final addresGeocode = await apiServiceNominatim.getAddresGeocode('Londrina');
-      final forecastData = await apiServiceWindy.getForecastData(addresGeocode['lat'], addresGeocode['lon']);
-      
-      /*
-        TO-DO, process all the data to retrieve the following informations:
-
-        Today Forecast
-        -weather overall string description
-        -current temp
-        -lower temp 
-        -highest temp
-
-
-        Hourly Forecast 
-        ....
-
-        10Day Forecast
-        ...
-      */
+      final forecastData = await apiServiceWindy.getForecastData(
+          position.latitude, position.longitude);
 
       //update the private vars states
       setState(() {
