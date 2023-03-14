@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WindyPointForecastApiService {
   final String _baseUrl = "https://api.windy.com/api/point-forecast/v2";
@@ -16,7 +17,7 @@ class WindyPointForecastApiService {
         "lon": longitude,
         "model": "gfs",
         "parameters": ["temp", "precip"],
-        "key": "LxkX09qmh4dcfy0x16kKBkfMiYBwOmdy"
+        "key": dotenv.env['WINDY_WEATHER_API_KEY']
       }),
     );
 
