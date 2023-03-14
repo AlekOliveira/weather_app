@@ -5,6 +5,7 @@ import 'package:weather_app/widgets/today_forecast.dart';
 import 'package:weather_app/services/windy_point_forecast_api.dart';
 // import 'package:weather_app/services/nominatim_reverse_geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -114,22 +115,34 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Weather App"),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          _isLoading
-              ? Expanded(child: Center(child: CircularProgressIndicator()))
-              : TodayForecast(
-                  city: "Londrina",
-                  minTemp: _forecastData['minTemp'] - 273.15,
-                  currTemp: _forecastData['currTemp'] - 273.15,
-                  maxTemp: _forecastData['maxTemp'] - 273.15,
-                  description: "Mostly Cloudy")
-        ],
-      ),
-    );
+        appBar: AppBar(
+          title: Text("Weather App"),
+          centerTitle: true,
+        ),
+        body: Container(          
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/background.gif"), fit: BoxFit.fill),
+          ),
+          child: Column(
+              children: [
+            _isLoading
+                ? Expanded(child: Center(child: CircularProgressIndicator()))
+                : TodayForecast(
+                    city: "Londrina",
+                    minTemp: _forecastData['minTemp'] - 273.15,
+                    currTemp: _forecastData['currTemp'] - 273.15,
+                    maxTemp: _forecastData['maxTemp'] - 273.15,
+                    description: "Mostly Cloudy")
+          ])
+        ));
   }
 }
+
+
+// TO-DO
+
+// -Retrieve city name and weather description dinamically
+// -Chose background image based on weather description
+// -Fix the UI collors
+// -Add temperature conversion C/F
